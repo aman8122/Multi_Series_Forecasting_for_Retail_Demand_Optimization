@@ -1,0 +1,56 @@
+# Core Libraries
+numpy
+pandas
+scipy
+
+# Visualization
+matplotlib
+seaborn
+plotly
+
+# Machine Learning
+scikit-learn
+tensorflow
+keras
+joblib
+
+# TensorBoard
+tensorboard
+
+# Configuration
+PyYAML
+python-dotenv
+
+# Jupyter
+jupyter
+notebook
+ipykernel
+
+# API
+fastapi
+uvicorn
+pydantic
+
+# Dashboard
+streamlit
+
+# Experiment Tracking
+mlflow
+
+# File Handling
+openpyxl
+xlrd
+
+# Utilities
+tqdm
+requests
+
+# Testing
+pytest
+
+# Packaging
+setuptools
+wheel
+
+-e .
+
