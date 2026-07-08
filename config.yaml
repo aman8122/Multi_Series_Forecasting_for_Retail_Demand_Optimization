@@ -1,0 +1,11 @@
+paths:
+  raw_data_path: "data/raw/training.csv"
+  test_data_path: "data/raw/testing.csv"
+  processed_test_path: "data/processed/test_processed.csv"
+  models_dir: "saved_models"
+  predictions_output: "artifacts/predictions.csv"
+
+models:
+  xgb: "xgb_model.pkl"
+  lgb: "lgb_model.pkl"
+  lstm: "lstm_model.keras"

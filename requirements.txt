@@ -1,56 +1,44 @@
-# Core Libraries
-numpy
-pandas
-scipy
+# Core Data Processing & Utilities
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+PyYAML>=6.0
+joblib>=1.3.0
+tqdm>=4.65.0
+requests>=2.31.0
+psutil>=5.9.0
 
 # Visualization
-matplotlib
-seaborn
-plotly
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
 
-# Machine Learning
-scikit-learn
-tensorflow
-keras
-joblib
+# Machine Learning & Deep Learning Engines
+scikit-learn>=1.2.0
+xgboost>=1.7.0
+lightgbm>=4.0.0
+keras>=2.13.0
+tensorboard>=2.13.0
 
-# TensorBoard
-tensorboard
 
-# Configuration
-PyYAML
-python-dotenv
 
-# Jupyter
-jupyter
-notebook
-ipykernel
-
-# API
-fastapi
-uvicorn
-pydantic
 
 # Dashboard
-streamlit
+streamlit>=1.25.0
 
-# Experiment Tracking
-mlflow
+# Jupyter & Interactive Environment
+jupyter>=1.0.0
+notebook>=6.5.0
+ipykernel>=6.20.0
 
 # File Handling
-openpyxl
-xlrd
+openpyxl>=3.1.0
+xlrd>=2.0.1
 
-# Utilities
-tqdm
-requests
+# Testing & Packaging
+pytest>=7.3.0
+setuptools>=67.0.0
+wheel>=0.40.0
 
-# Testing
-pytest
-
-# Packaging
-setuptools
-wheel
-
+# Editable local project packaging standard
 -e .
-
