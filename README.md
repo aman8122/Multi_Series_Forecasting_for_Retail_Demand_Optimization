@@ -246,6 +246,7 @@ Multi_Series_Forecasting_for_Retail_Demand_Optimization/
 │   │   ├── data_validation.py
 │   │   ├── data_transformation.py
 │   │   ├── model_trainer.py
+│   │   ├── evaluation.py
 │   │   └── prediction.py
 │   │
 │   ├── pipeline/
@@ -254,7 +255,6 @@ Multi_Series_Forecasting_for_Retail_Demand_Optimization/
 │   │
 │   ├── logger.py
 │   ├── exception.py
-│   
 │
 ├── app.py
 ├── config.yaml
