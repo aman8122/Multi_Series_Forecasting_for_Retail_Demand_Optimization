@@ -54,21 +54,7 @@ The complete pipeline includes:
 
 ---
 
-# 📊 Streamlit Dashboard
 
-Below is the live dashboard of the forecasting system.
-
-> Save your dashboard screenshot inside:
-
-```
-assets/dashboard_screenshot.png
-```
-
-Then GitHub will automatically display it.
-
-```markdown
-![Dashboard](assets/dashboard_screenshot.png)
-```
 
 ---
 
@@ -268,7 +254,7 @@ Multi_Series_Forecasting_for_Retail_Demand_Optimization/
 │   │
 │   ├── logger.py
 │   ├── exception.py
-│   └── utils.py
+│   
 │
 ├── app.py
 ├── config.yaml
