@@ -38,12 +38,12 @@ processed_train_path = os.path.join(processed_dir, "train_processed.csv")
 st.title("📈 Multi-Series Retail Demand Forecasting App")
 st.markdown("---")
 
-# 1. Sidebar - Model Details & File Uploads
-st.sidebar.header("📁 Data & Configuration")
+# 1. Sidebar - Model Details & Configuration
+st.sidebar.header("🧠 Engine Configuration")
 
 # Model drop-down option for users to select the best model
 model_choice = st.sidebar.selectbox(
-    "🧠 Choose Forecasting Model",
+    "Choose Forecasting Model",
     options=["LightGBM", "XGBoost", "LSTM"]
 )
 
@@ -61,38 +61,67 @@ if os.path.exists(model_path):
 else:
     st.sidebar.error(f"❌ {model_choice} file missing! Please run train_pipeline.py first.")
 
-# File Uploader for Test Data
-uploaded_file = st.sidebar.file_uploader("Upload Testing CSV Data", type=["csv"])
+# Tab Selection - Allows user to choose between Form Input or CSV Upload
+st.markdown("### Select Input Method")
+tab1, tab2 = st.tabs(["🎯 Single Item Prediction Form", "📁 Bulk CSV Batch File Upload"])
 
-# 2. Main Dashboard Logic
-if uploaded_file is not None:
-    try:
-        logging.info("New test file uploaded via Streamlit UI")
-        # Read Uploaded Data
-        test_df = pd.read_csv(uploaded_file)
+# Variable to hold data for prediction engine
+input_df = None
+is_single_input = False
+
+# --- TAB 1: SINGLE ITEM MANUAL FORM ---
+with tab1:
+    st.markdown("#### Enter Parameters Manually")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        selected_date = st.date_input("📅 Target Prediction Date")
+    with col2:
+        selected_store = st.number_input("🏪 Store ID", min_value=1, max_value=50, value=1, step=1)
+    with col3:
+        selected_item = st.number_input("📦 Item ID", min_value=1, max_value=100, value=1, step=1)
         
+    if st.button("🚀 Run Single Forecast"):
+        # Building an automated runtime DataFrame mimicking pipeline entry structure
+        input_df = pd.DataFrame([{
+            'date': str(selected_date),
+            'store': int(selected_store),
+            'item': int(selected_item)
+        }])
+        is_single_input = True
+
+# --- TAB 2: BULK CSV BATCH FILE UPLOAD ---
+with tab2:
+    uploaded_file = st.file_uploader("Upload Testing CSV Data", type=["csv"])
+    if uploaded_file is not None:
+        input_df = pd.read_csv(uploaded_file)
         st.subheader("👀 Raw Uploaded Data Preview")
-        # FIXED: Replaced use_container_width=True with width='stretch'
-        st.dataframe(test_df.head(), width='stretch') 
+        st.dataframe(input_df.head(), width='stretch')
 
+# --- MAIN FORECASTING PROCESSING PIPELINE ENGINE ---
+if input_df is not None:
+    try:
         if os.path.exists(processed_train_path) and os.path.exists(model_path):
-            if st.button("🚀 Generate Demand Forecast"):
-                with st.spinner(f"Processing features and predicting using {model_choice}..."):
-                    
-                    logging.info(f"Demand Forecast button clicked. Model: {model_choice}")
-                    
-                    # Load processed training context for secure sequence-wise lag calculation
-                    train_context = pd.read_csv(processed_train_path)
-                    logging.info("Processed training context data loaded successfully for lag context")
-                    
-                    # Transform features using new decoupled steps (Validation -> FeatureEngineering)
-                    validator = DataValidation()
-                    clean_train_context = validator.validate_and_clean(train_context, is_train=True)
-                    clean_raw_test = validator.validate_and_clean(test_df, is_train=False)
+            with st.spinner(f"Processing structural maps and predicting using {model_choice}..."):
+                
+                logging.info(f"Forecasting cycle triggered via Streamlit UI. Model: {model_choice}")
+                
+                # Load processed training context for secure sequence-wise lag calculation
+                train_context = pd.read_csv(processed_train_path)
+                logging.info("Processed training context data loaded successfully for lag context")
+                
+                # Transform features using new decoupled steps (Validation -> FeatureEngineering)
+                validator = DataValidation()
+                clean_train_context = validator.validate_and_clean(train_context, is_train=True)
+                clean_raw_test = validator.validate_and_clean(input_df, is_train=False)
 
-                    engineer = FeatureEngineering()
-                    _, final_test = engineer.extract_features(clean_train_context, clean_raw_test)
-                    
+                engineer = FeatureEngineering()
+                _, final_test = engineer.extract_features(clean_train_context, clean_raw_test)
+                
+                # Ensure runtime single tracking indices aren't lost
+                if final_test.empty:
+                    st.error("Context Boundary Matrix generation failed for this specific entity date combination!")
+                else:
                     # Load Scaler object
                     scaler_path = os.path.join(models_dir, "scaler.pkl")
                     if os.path.exists(scaler_path):
@@ -107,7 +136,7 @@ if uploaded_file is not None:
                     # Scale dataset features using production safe transform mode
                     final_test[base_features] = scaler.transform(final_test[base_features])
                     
-                    # 🔄 STRICT FEATURE ALIGNMENT BLOCK
+                    # STRICT FEATURE ALIGNMENT BLOCK
                     if model_choice != "LSTM":
                         model = joblib.load(model_path)
                         
@@ -136,18 +165,26 @@ if uploaded_file is not None:
                     logging.info("Predictions generated successfully with strict columns mapping")
                     
                     # Map predictions back to visible dataframe
-                    output_df = test_df.copy()
-                    output_df['Predicted_Sales'] = np.round(predictions, 2)
+                    output_df = input_df.copy()
+                    
+                    # FIXED FOR INTEGER ROUNDING: Float hataya aur pure clean integers me cast kiya
+                    output_df['Predicted_Sales'] = np.round(predictions).astype(int)
                     
                     st.markdown("---")
-                    st.subheader(f"📊 Forecast Results ({model_choice})")
-                    # FIXED: Replaced use_container_width=True with width='stretch'
+                    st.subheader(f" Forecast Results ({model_choice})")
+                    
+                    if is_single_input:
+                        # Displaying as clean, optimized metrics box if it's a form input
+                        predicted_value = output_df['Predicted_Sales'].values[0]
+                        st.metric(label=f"Predicted Retail Demand Quantity", value=f"{predicted_value} Units")
+                    
+                    # Display Full Detailed Grid Matrix anyway
                     st.dataframe(output_df, width='stretch')
                     
-                    # Download button for predictions
+                    # Download button for predictions matrix
                     csv = output_df.to_csv(index=False).encode('utf-8')
                     st.download_button(
-                        label="📥 Download Predictions CSV",
+                        label="⬇ Download Predictions CSV",
                         data=csv,
                         file_name=f"demand_predictions_{model_choice.lower()}.csv",
                         mime="text/csv"
@@ -155,7 +192,7 @@ if uploaded_file is not None:
                     logging.info("Forecast dataframe displayed and download link generated")
                     
         else:
-            st.warning(f"⚠️ Processed context metadata missing! Make sure '{processed_train_path}' and '{model_path}' exist.")
+            st.warning(f" Processed context metadata missing! Make sure '{processed_train_path}' and '{model_path}' exist.")
             logging.warning("Prediction attempted but context target storage points are missing")
 
     except Exception as e:
@@ -164,4 +201,4 @@ if uploaded_file is not None:
         raise CustomException(e, sys)
 
 else:
-    st.info("💡 Please upload a testing CSV file from the sidebar to start forecasting.")
+    st.info("💡 Choose a parameter from the form tab or upload a CSV file from the bulk tab to see demand predictions.")
