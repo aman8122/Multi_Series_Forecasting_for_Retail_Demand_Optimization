@@ -254,7 +254,7 @@ Multi_Series_Forecasting_for_Retail_Demand_Optimization/
 │   │
 │   ├── logger.py
 │   ├── exception.py
-│   └── utils.py
+│   
 │
 ├── app.py
 ├── config.yaml
